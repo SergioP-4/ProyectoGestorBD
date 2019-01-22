@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Description of bd
  *
@@ -15,7 +16,7 @@ class bd {
         $this->h = $h;
         $this->u = $u;
         $this->p = $p;
-        $this->conexion = $this->conectar();
+        //$this->conexion = $this->conectar();
     }
 
     public function conectar() {
@@ -43,16 +44,17 @@ class bd {
         $this->conexion->close();
     }
 
-    /* public function conectarPDO($bd) {
-      try {
-      $dsn = "mysql:host=$this->host;dbname=$bd";
-      $atributos = [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
-      PDO::ATTR_ERRMODE => true,
-      PDO::ERRMODE_EXCEPTION => true];
-      $conexionPDO = new PDO($dsn, $this->user, $this->pass, $atributos);
-      return $conexionPDO;
-      } catch (PDOException $ex) {
-      return die("Error conectando a la base de datos " . $ex->getMessage());
-      }
-      } */
+    public function conectarPDO($bd) {
+        try {
+            $dsn = "mysql:host=$this->host;dbname=$bd";
+            $atributos = [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
+                PDO::ATTR_ERRMODE => true,
+                PDO::ERRMODE_EXCEPTION => true];
+            $conexionPDO = new PDO($dsn, $this->user, $this->pass, $atributos);
+            return $conexionPDO;
+        } catch (PDOException $ex) {
+            return die("Error conectando a la base de datos " . $ex->getMessage());
+        }
+    }
+
 }

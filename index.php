@@ -3,20 +3,27 @@ spl_autoload_register(function($clase) {
     require_once ("$clase.php");
 });
 $bd = filter_input(INPUT_POST, "bd");
+if (isset($_SESSION['host'])) {
+    header("Location:tablas.php");
+}
+$host = $_POST['host'];
+$user = $_POST['user'];
+$pass = $_POST['pass'];
 switch ($_POST['submit']) {
     case "Conectar":
-        $host = $_POST['host'];
-        $user = $_POST['user'];
-        $pass = $_POST['pass'];
         $bd = new bd($host, $user, $pass);
         $consulta = "show databases";
         $dataBases = $bd->consultar($consulta);
         break;
     case "Gestionar":
-        header("Location:tablas.php?datos=$datos");
+        $_SESSION['host'] = $_POST['host'];
+        $_SESSION['user'] = $_POST['user'];
+        $_SESSION['pass'] = $_POST['pass'];
+        header("Location:tablas.php?bd=$bd");
         exit();
         break;
 }
+//$bd->cerrar();
 ?>
 
 <!DOCTYPE html>
@@ -51,12 +58,12 @@ and open the template in the editor.
                     foreach ($baseDatos as $datos) {
                         echo "<form action='index.php' method='POST'>"
                         . "<input type='radio' name='bd' value='$datos'>$datos<br> "
-                        . "<input type='hidden' value='$datos' name='bd'>"
-                        . "</form>";
+                        ;
                     }
                 }
+                echo "<input type ='submit' name='submit' value='Gestionar'></form>";
                 ?>
-                <input type ="submit" name="submit" value="Gestionar">
+
             </form>
         </fieldset>
     </body>
