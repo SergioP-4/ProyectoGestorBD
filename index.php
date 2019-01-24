@@ -2,30 +2,32 @@
 spl_autoload_register(function($clase) {
     require_once ("$clase.php");
 });
-$bd = filter_input(INPUT_POST, "bd");
-if (isset($_SESSION['host'])) {
-    header("Location:tablas.php");
-}
-$host = $_POST['host'];
-$user = $_POST['user'];
-$pass = $_POST['pass'];
-switch ($_POST['submit']) {
-    case "Conectar":
-        $bd = new bd($host, $user, $pass);
-        $consulta = "show databases";
-        $dataBases = $bd->consultar($consulta);
-        break;
-    case "Gestionar":
-        $_SESSION['host'] = $_POST['host'];
-        $_SESSION['user'] = $_POST['user'];
-        $_SESSION['pass'] = $_POST['pass'];
-        header("Location:tablas.php?bd=$bd");
-        exit();
-        break;
-}
-//$bd->cerrar();
-?>
+session_start();
+//session_destroy();
 
+
+
+if (isset($_POST['submit'])) {
+    $_SESSION['host'] = filter_input(INPUT_POST, 'host');
+    $_SESSION['user'] = filter_input(INPUT_POST, 'user');
+    $_SESSION['pass'] = filter_input(INPUT_POST, 'pass');
+}
+echo $host;
+if (isset($_SESSION['host'])) {
+    $host = $_SESSION['host'];
+    $user = $_SESSION['user'];
+    $pass = $_SESSION['pass'];
+    $bd = new bd($host, $user, $pass, null);
+} else {
+
+    //Asigno estos valores por defecto (que no haya aportado nadie nada, ni usuarioni sesiones.
+    $host = ' ';
+    $user = ' ';
+    $pass = ' ';
+}
+
+//$bd = new bd($host, $user, $pass);
+?>
 <!DOCTYPE html>
 <!--
 To change this license header, choose License Headers in Project Properties.
@@ -42,7 +44,7 @@ and open the template in the editor.
             <legend>Datos de Conexión</legend>
             <form action="index.php" method="POST">
                 Host:
-                <input type="text" name="host" value="172.17.0.2">
+                <input type="text" name="host" value=" ">
                 Usuario:
                 <input type="text" name="user" value="root">
                 Password:
@@ -50,21 +52,26 @@ and open the template in the editor.
                 <input type="submit" name="submit" value="Conectar">
             </form>
         </fieldset>
-        <fieldset>
-            <legend>Gestión de las Bases de Datos del host <?php echo $host; ?></legend>
-            <form action="index.php" method="POST">
-                <?php
-                foreach ($dataBases as $baseDatos) {
-                    foreach ($baseDatos as $datos) {
-                        echo "<form action='index.php' method='POST'>"
-                        . "<input type='radio' name='bd' value='$datos'>$datos<br> "
-                        ;
+        <?php
+        if ($bd->conectado()):
+            ?>
+            <fieldset>
+                <legend>Gestión de las Bases de Datos del host <?php echo $host; ?></legend>
+                <form action="tablas.php" method="POST">
+                    <?php
+                    $datos = $bd->select("show DATABASES");
+                    foreach ($datos as $array) {
+                        foreach ($array as $nombreBD) {
+                            echo "<input type=radio value='$nombreBD' name=nombreBD>$nombreBD<br/>";
+                        }
                     }
-                }
-                echo "<input type ='submit' name='submit' value='Gestionar'></form>";
-                ?>
-
-            </form>
-        </fieldset>
+                    ?>
+                    <input type ='submit' value='Gestionar'>
+                </form>
+            </fieldset>
+            <?php
+            $bd->cerrar();
+        endif
+        ?>
     </body>
 </html>

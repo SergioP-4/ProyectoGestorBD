@@ -1,19 +1,23 @@
 <?php
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 spl_autoload_register(function($clase) {
     require_once ("$clase.php");
 });
+
+session_start();
 $host = $_SESSION['host'];
 $user = $_SESSION['user'];
 $pass = $_SESSION['pass'];
-//$bd = new bd($host, $user, $pass);
-$basedatos= $_GET['bd'];
-echo $bd;
+$baseDatos = filter_input(INPUT_POST, 'nombreBD');
+
+if (!isset($baseDatos)) {
+    $baseDatos = $_SESSION['basedatos'];
+} else {
+    $_SESSION['basedatos'] = $baseDatos;
+}
+
+$bd = new bd($host, $user, $pass, $baseDatos);
 ?>
+
 <!DOCTYPE html>
 <!--
 To change this license header, choose License Headers in Project Properties.
@@ -27,25 +31,23 @@ and open the template in the editor.
     </head>
     <body>
         <fieldset>
-            <legend>Listado base de datos</legend>
-            <form action="index.php" method="POST">
-                <input type="submit" name="submit" value="Volver">
+            <legend>Listado bases de datos</legend>
+            <form action="index.php" method='POST'>
+                <input type="submit" value="Volver" name="volver">
             </form>
         </fieldset>
-        <fieldset>
-            <legend>Gestión de las Bases de Datos <?php echo $basedatos; ?></legend>
-            <form action="index.php" method="POST">
+        <fieldset style="">
+            <legend>Gestion de las Bases de Datos<?php echo " $baseDatos "; ?></legend>
+            <form action="gestionTablas.php" method="POST">
                 <?php
-                foreach ($dataBases as $baseDatos) {
-                    foreach ($baseDatos as $datos) {
-                        echo "<form action='index.php' method='POST'>"
-                        . "<input type='radio' name='bd' value='$datos'>$datos<br> "
-                        ;
+                $tablas = $bd->select("show TABLES from $baseDatos");
+                foreach ($tablas as $array) {
+                    foreach ($array as $nombreTablas) {
+                        echo "<input type=submit value='$nombreTablas' name=nombreTablas>";
                     }
                 }
-                echo "<input type ='submit' name='submit' value='Gestionar'></form>";
+                $bd->cerrar();
                 ?>
-                
             </form>
         </fieldset>
     </body>
