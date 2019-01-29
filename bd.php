@@ -31,7 +31,7 @@ class bd {
 
     public function conectado() {
         if ($this->conexion == true) {
-            return true;
+            return $this->conexion;
         }
     }
 
@@ -45,8 +45,10 @@ class bd {
         return $baseDatos;
     }
 
-    public function select_tables($c) {
-
+    public function update_tables($c) {
+        $consulta = $this->conexion->prepare($c);
+        return $consulta->execute();
+        
     }
 
     public function cerrar() {
